@@ -9,8 +9,12 @@ from .serializers import *
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from datetime import date
-
-
+import os
+from django.conf import settings
+import shutil
+from django.http import FileResponse
+from django.views import View
+from datetime import datetime
 
 
 class InformationViewSet(APIView):
@@ -622,3 +626,20 @@ class ManagementViewSet(APIView):
             return Response(data,status=status.HTTP_200_OK)
         else :
             return Response({"detail":"les dates n'ont pas été envoyé"})    
+
+class BackupDatabaseView(View):
+    def get(self, request, *args, **kwargs):
+        # Chemin de la base de données SQLite
+        db_path = settings.DATABASES['default']['NAME']
+        
+        # Créer un nom de fichier de sauvegarde avec la date et l'heure
+        backup_filename = f"backup_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.sqlite3"
+        backup_path = os.path.join(settings.MEDIA_ROOT, backup_filename)
+        
+        # Copier la base de données dans le dossier de sauvegarde
+        shutil.copy2(db_path, backup_path)
+        
+        # Renvoyer le fichier en tant que réponse téléchargeable
+        response = FileResponse(open(backup_path, 'rb'))
+        response['Content-Disposition'] = f'attachment; filename="{backup_filename}"'
+        return response

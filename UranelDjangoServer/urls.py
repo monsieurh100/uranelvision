@@ -16,4 +16,5 @@ urlpatterns = [
     path('login/',CustomAuthToken.as_view(),name="login"),
     path('management/',ManagementViewSet.as_view(),name="management"),
     path('information/',InformationViewSet.as_view(),name="information"),
+    path('backup/', BackupDatabaseView.as_view(), name='backup-database'),
 ]
